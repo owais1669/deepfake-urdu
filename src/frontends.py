@@ -19,11 +19,10 @@ MFCC_FN = torchaudio.transforms.MFCC(
     },
 ).to(device)
 
-
 LFCC_FN = torchaudio.transforms.LFCC(
     sample_rate=SAMPLING_RATE,
     n_lfcc=80,  # Adjust if needed
-    speckwargs={
+    melkwargs={  # Use melkwargs for consistency
         "n_fft": 512,
         "win_length": win_length,
         "hop_length": hop_length,
