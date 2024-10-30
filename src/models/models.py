@@ -1,4 +1,5 @@
 from typing import Dict
+
 from src.models import (
     lcnn,
     specrnet,
@@ -9,20 +10,22 @@ from src.models import (
     whisper_meso_net
 )
 
-def get_model(model_name: str, config: Dict, device: str):
-    frontend_name = config.get("frontend_name", "mfcc")  # Default to "mfcc" if not provided
 
+def get_model(model_name: str, config: Dict, device: str):
     if model_name == "rawnet3":
         return rawnet3.prepare_model()
     elif model_name == "lcnn":
-        return lcnn.FrontendLCNN(device=device, frontend_name=frontend_name, **config)
+        return lcnn.FrontendLCNN(device=device, **config)
     elif model_name == "specrnet":
-        return specrnet.FrontendSpecRNet(device=device, **config)
+        return specrnet.FrontendSpecRNet(
+            device=device,
+            **config,
+        )
     elif model_name == "mesonet":
         return meso_net.FrontendMesoInception4(
             input_channels=config.get("input_channels", 1),
             fc1_dim=config.get("fc1_dim", 1024),
-            frontend_algorithm=frontend_name,
+            frontend_algorithm=config.get("frontend_algorithm", "lfcc"),
             device=device,
         )
     elif model_name == "whisper_lcnn":
@@ -48,14 +51,14 @@ def get_model(model_name: str, config: Dict, device: str):
         return whisper_lcnn.WhisperMultiFrontLCNN(
             input_channels=config.get("input_channels", 2),
             freeze_encoder=config.get("freeze_encoder", False),
-            frontend_algorithm=frontend_name,
+            frontend_algorithm=config.get("frontend_algorithm", "lfcc"),
             device=device,
         )
     elif model_name == "whisper_frontend_specrnet":
         return whisper_specrnet.WhisperMultiFrontSpecRNet(
             input_channels=config.get("input_channels", 2),
             freeze_encoder=config.get("freeze_encoder", False),
-            frontend_algorithm=frontend_name,
+            frontend_algorithm=config.get("frontend_algorithm", "lfcc"),
             device=device,
         )
     elif model_name == "whisper_frontend_mesonet":
@@ -63,7 +66,7 @@ def get_model(model_name: str, config: Dict, device: str):
             input_channels=config.get("input_channels", 2),
             fc1_dim=config.get("fc1_dim", 1024),
             freeze_encoder=config.get("freeze_encoder", True),
-            frontend_algorithm=frontend_name,
+            frontend_algorithm=config.get("frontend_algorithm", "lfcc"),
             device=device,
         )
     else:
