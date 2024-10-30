@@ -87,6 +87,7 @@ class LCNN(nn.Module):
         hidden_features = hidden_features.permute(0, 2, 1, 3).contiguous()
         frame_num = hidden_features.shape[1]
         hidden_features = hidden_features.view(batch_size, frame_num, -1)
+        print("Shape before BLSTM layers:", hidden_features.shape)  # Debugging print
         hidden_features_lstm = self.m_before_pooling(hidden_features)
         tmp_emb = self.m_output_act((hidden_features_lstm + hidden_features).mean(1))
         output_emb[:] = tmp_emb
@@ -115,7 +116,9 @@ class FrontendLCNN(nn.Module):
 
     def _compute_embedding(self, x):
         x = self.conv1(x)
+        print("Shape after conv1:", x.shape)  # Debugging print to check shape before flattening
         x = x.view(x.size(0), -1)
+        print("Shape before fc layer:", x.shape)  # Debugging print to check shape before fully connected layer
         x = self.fc(x)
         return x
 
@@ -129,6 +132,6 @@ if __name__ == "__main__":
     model = FrontendLCNN(device=device, frontend_name="mfcc")
     model.to(device)
     batch_size = 12
-    mock_input = torch.rand((batch_size, 1, 128, 128), device=device)
+    mock_input = torch.rand((batch_size, 3, 128, 128), device=device)  # Adjusted to 3 channels
     output = model(mock_input)
     print("Output shape:", output.shape)
