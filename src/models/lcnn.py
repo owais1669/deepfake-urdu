@@ -101,7 +101,7 @@ class FrontendLCNN(nn.Module):
         super(FrontendLCNN, self).__init__()
         self.device = device
         self.frontend = get_frontend([frontend_name])
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)  # Set input channels to 3
         self.fc = nn.Linear(32 * 40 * 40, 512)  # Adjust dimensions as needed
         print(f"Using {frontend_name} frontend")
 
