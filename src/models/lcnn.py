@@ -219,7 +219,7 @@ class FrontendLCNN(LCNN):
         self.device = device
 
         frontend_name = kwargs.get("frontend_algorithm", [])
-        self.frontend = frontends.get_frontend(frontend_name)
+        self.frontend = frontends.get_frontend(config["frontend_name"])
         print(f"Using {frontend_name} frontend")
 
     def _compute_frontend(self, x):
