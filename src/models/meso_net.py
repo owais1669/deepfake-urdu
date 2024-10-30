@@ -105,7 +105,7 @@ class FrontendMesoInception4(MesoInception4):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.device = kwargs['device']
-        frontend_name = kwargs.get("frontend_algorithm", [])
+        frontend_name = kwargs.get("frontend_algorithm", "default_frontend")
         self.frontend = frontends.get_frontend(frontend_name)
         print(f"Using {frontend_name} frontend")
 
@@ -113,14 +113,13 @@ class FrontendMesoInception4(MesoInception4):
         # Apply frontend
         x = self.frontend(x)
         
-        # Reshape or adjust dimensions if needed
+        # Check and adjust dimensions if needed
         if x.dim() == 5:  # If input is [batch, channels, height, width, time]
-            batch, channels, height, width, time = x.size()
-            # Reshape to [batch, channels, height, width]
-            x = x.mean(dim=-1)  # Average over time dimension
-            # Or you could use: x = x[..., 0]  # Take first time step
-        
-        x = self._compute_embedding(x)
+            # Average over the time dimension or take the first time step
+            x = x.mean(dim=-1)  # Average over time dimension to reduce to 4D
+
+        # Now pass the correctly shaped tensor to the parent's compute embedding method
+        x = super()._compute_embedding(x)
         return x
 
 if __name__ == "__main__":
