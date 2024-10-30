@@ -77,7 +77,7 @@ class RawNet3(nn.Module):
         :param x: input mini-batch (bs, samp)
         """
 
-        with torch.amp.autocast("cuda"(enabled=False):
+        with torch.amp.autocast("cuda"(enabled=False)):
             x = self.preprocess(x)
             x = torch.abs(self.conv1(x))
             if self.log_sinc:
