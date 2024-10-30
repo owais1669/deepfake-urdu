@@ -143,20 +143,18 @@ class PreEmphasis(torch.nn.Module):
     def __init__(self, coef: float = 0.97) -> None:
         super().__init__()
         self.coef = coef
-        # make kernel
-        # In pytorch, the convolution operation uses cross-correlation. So, filter is flipped.
+        # Make kernel with the flipped filter for convolution
         self.register_buffer(
             "flipped_filter",
             torch.FloatTensor([-self.coef, 1.0]).unsqueeze(0).unsqueeze(0),
         )
 
     def forward(self, input: torch.tensor) -> torch.tensor:
-        assert (
-            len(input.size()) == 2
-        ), "The number of dimensions of input tensor must be 2!"
-        # reflect padding to match lengths of in/out
-        input = input.unsqueeze(1)
-        input = F.pad(input, (1, 0), "reflect")
+        # Ensure input has 2 dimensions, reshape if necessary
+        if len(input.size()) != 2:
+            input = input.view(input.size(0), -1)  # Flatten extra dimensions if needed
+        input = input.unsqueeze(1)  # Add channel dimension
+        input = F.pad(input, (1, 0), "reflect")  # Reflect padding for edge handling
         return F.conv1d(input, self.flipped_filter)
 
 
