@@ -12,18 +12,19 @@ class MesoInception4(nn.Module):
         super().__init__()
         
         self.fc1_dim = kwargs.get("fc1_dim", 1024)
-        self.input_channels = kwargs.get("input_channels", 3)  # Default to 3 channels
+        self.input_channels = kwargs.get("input_channels", 3)  # Set default to 3 channels as provided
         self.num_classes = num_classes
 
         # InceptionLayer1
-        self.Incption1_conv1 = nn.Conv2d(self.input_channels, self.input_channels, 1, padding=0, bias=False)
+        self.Incption1_conv1 = nn.Conv2d(self.input_channels, 1, 1, padding=0, bias=False)  # Change 1 to self.input_channels
         self.Incption1_conv2_1 = nn.Conv2d(self.input_channels, 4, 1, padding=0, bias=False)
         self.Incption1_conv2_2 = nn.Conv2d(4, 4, 3, padding=1, bias=False)
         self.Incption1_conv3_1 = nn.Conv2d(self.input_channels, 4, 1, padding=0, bias=False)
         self.Incption1_conv3_2 = nn.Conv2d(4, 4, 3, padding=2, dilation=2, bias=False)
         self.Incption1_conv4_1 = nn.Conv2d(self.input_channels, 2, 1, padding=0, bias=False)
         self.Incption1_conv4_2 = nn.Conv2d(2, 2, 3, padding=3, dilation=3, bias=False)
-        self.Incption1_bn = nn.BatchNorm2d(self.input_channels + 10)
+        self.Incption1_bn = nn.BatchNorm2d(11)
+
 
         # InceptionLayer2
         self.Incption2_conv1 = nn.Conv2d(self.input_channels + 10, 2, 1, padding=0, bias=False)
@@ -83,26 +84,6 @@ class MesoInception4(nn.Module):
         x = self.InceptionLayer1(input)
         x = self.InceptionLayer2(x)
 
-        x = self.conv1(x)
-        x = self.relu(x)
-        x = self.bn1(x)
-        x = self.maxpooling1(x)
-
-        x = self.conv2(x)
-        x = self.relu(x)
-        x = self.bn1(x)
-        x = self.maxpooling2(x)
-
-        x = x.view(x.size(0), -1)
-        x = self.dropout(x)
-
-        x = nn.AdaptiveAvgPool1d(self.fc1_dim)(x)
-        x = self.fc1(x)
-        x = self.leakyrelu(x)
-        x = self.dropout(x)
-        x = self.fc2(x)
-        return x
-
 
 class FrontendMesoInception4(MesoInception4):
     def __init__(self, **kwargs):
@@ -116,19 +97,16 @@ class FrontendMesoInception4(MesoInception4):
         # Apply frontend
         x = self.frontend(x)
         
-        # Check and adjust dimensions if needed
-        if x.dim() == 5:  # If input is [batch, channels, height, width, time]
-            # Average over the time dimension or take the first time step
-            x = x.mean(dim=-1)  # Average over time dimension to reduce to 4D
+        # Ensure correct input shape for Conv2d
+        if x.dim() == 5:  # [batch, channels, height, width, time]
+            x = x.mean(dim=-1)  # Reduce to 4D if necessary
 
-        # Now pass the correctly shaped tensor to the parent's compute embedding method
         x = super()._compute_embedding(x)
         return x
-
 if __name__ == "__main__":
     # Create model with 3 input channels instead of 2
     model = FrontendMesoInception4(
-        input_channels=3,  # Changed from 2 to 3
+        input_channels=3,  # Adjust based on frontend output
         fc1_dim=1024,
         device='cuda',
         frontend_algorithm="lfcc"
