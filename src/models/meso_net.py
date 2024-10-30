@@ -21,8 +21,7 @@ class MesoInception4(nn.Module):
         self.Incption1_conv4_2 = nn.Conv2d(2, 2, 3, padding=3, dilation=3, bias=False)
         self.Incption1_bn = nn.BatchNorm2d(11)
 
-        # Rest of the code remains the same
-        #InceptionLayer2
+        # InceptionLayer2
         self.Incption2_conv1 = nn.Conv2d(11, 2, 1, padding=0, bias=False)
         self.Incption2_conv2_1 = nn.Conv2d(11, 4, 1, padding=0, bias=False)
         self.Incption2_conv2_2 = nn.Conv2d(4, 4, 3, padding=1, bias=False)
@@ -32,7 +31,7 @@ class MesoInception4(nn.Module):
         self.Incption2_conv4_2 = nn.Conv2d(2, 2, 3, padding=3, dilation=3, bias=False)
         self.Incption2_bn = nn.BatchNorm2d(12)
 
-        #Normal Layer
+        # Normal Layers
         self.conv1 = nn.Conv2d(12, 16, 5, padding=2, bias=False)
         self.relu = nn.ReLU(inplace=True)
         self.leakyrelu = nn.LeakyReLU(0.1)
@@ -46,7 +45,6 @@ class MesoInception4(nn.Module):
         self.fc1 = nn.Linear(self.fc1_dim, 16)
         self.fc2 = nn.Linear(16, num_classes)
 
-    # Rest of the methods remain the same
     def InceptionLayer1(self, input):
         x1 = self.Incption1_conv1(input)
         x2 = self.Incption1_conv2_1(input)
