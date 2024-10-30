@@ -137,7 +137,7 @@ def train_model(model, train_loader, val_loader, epochs=10, learning_rate=0.001,
             for features, labels in train_loader:
                 features, labels = features.to(device), labels.to(device)
                 optimizer.zero_grad()
-                outputs = model(features)
+                outputs = model(features.squeeze(1) if features.dim() == 3 else features)
                 loss = criterion(outputs, labels)
                 loss.backward()
                 optimizer.step()
@@ -156,7 +156,7 @@ def train_model(model, train_loader, val_loader, epochs=10, learning_rate=0.001,
         with torch.no_grad():
             for features, labels in val_loader:
                 features, labels = features.to(device), labels.to(device)
-                outputs = model(features)
+                outputs = model(features.squeeze(1) if features.dim() == 3 else features)
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
