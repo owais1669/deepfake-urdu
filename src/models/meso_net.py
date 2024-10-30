@@ -110,7 +110,16 @@ class FrontendMesoInception4(MesoInception4):
         print(f"Using {frontend_name} frontend")
 
     def forward(self, x):
+        # Apply frontend
         x = self.frontend(x)
+        
+        # Reshape or adjust dimensions if needed
+        if x.dim() == 5:  # If input is [batch, channels, height, width, time]
+            batch, channels, height, width, time = x.size()
+            # Reshape to [batch, channels, height, width]
+            x = x.mean(dim=-1)  # Average over time dimension
+            # Or you could use: x = x[..., 0]  # Take first time step
+        
         x = self._compute_embedding(x)
         return x
 
