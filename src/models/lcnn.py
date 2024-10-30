@@ -212,20 +212,33 @@ class LCNN(torch_nn.Module):
 
 
 
-class FrontendLCNN(torch_nn.Module):
+import torch.nn as nn
+from src.frontends import get_frontend
+
+class FrontendLCNN(nn.Module):
     def __init__(self, device="cpu", frontend_name="mfcc", **config):
         super(FrontendLCNN, self).__init__()
-        # Initialize the frontend only once
-        self.frontend = get_frontend([frontend_name])  # Pass frontend_name as a list
         self.device = device
+        # Frontend layer
+        self.frontend = get_frontend([frontend_name])
+        
+        # Define some example layers
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
+        self.fc = nn.Linear(32 * 128 * 128, 512)  # Replace with actual dimensions
 
         print(f"Using {frontend_name} frontend")
 
     def _compute_frontend(self, x):
         frontend = self.frontend(x)
         if frontend.ndim < 4:
-            return frontend.unsqueeze(1)  # (bs, 1, n_lfcc, frames)
+            frontend = frontend.unsqueeze(1)  # (bs, 1, n_lfcc, frames)
         return frontend  # (bs, n, n_lfcc, frames)
+
+    def _compute_embedding(self, x):
+        x = self.conv1(x)
+        x = x.view(x.size(0), -1)  # Flatten before FC layer
+        x = self.fc(x)
+        return x
 
     def forward(self, x):
         x = self._compute_frontend(x)
