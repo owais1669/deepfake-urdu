@@ -108,9 +108,11 @@ class FrontendLCNN(nn.Module):
     def _compute_frontend(self, x):
         frontend = self.frontend(x)
         if frontend.ndim == 5:
-            frontend = frontend[:, :, :, :, 0]  # Flatten to (batch, channels, height, width)
+            frontend = frontend[:, :, :, :, 0]  # Convert to 4D tensor if needed
+        elif frontend.size(1) == 3:  # If it has 3 channels, average them to get a single channel
+            frontend = frontend.mean(dim=1, keepdim=True)  # Average across the channel dimension
         elif frontend.ndim < 4:
-            frontend = frontend.unsqueeze(1)
+            frontend = frontend.unsqueeze(1)  # Ensure it is 4D
         return frontend
 
     def _compute_embedding(self, x):
