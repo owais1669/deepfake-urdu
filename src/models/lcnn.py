@@ -211,25 +211,31 @@ class LCNN(torch_nn.Module):
 
 
 class FrontendLCNN(LCNN):
-    """ Model definition
+    """ Model definition with frontend processing.
     """
     def __init__(self, device: str = "cuda", **kwargs):
         super().__init__(**kwargs)
-
         self.device = device
 
-        frontend_name = kwargs.get("frontend_algorithm", [])
-        self.frontend = frontends.get_frontend(config["frontend_name"])
+        # Retrieve the frontend name from kwargs, defaulting to an empty list if not provided
+        frontend_name = kwargs.get("frontend_name", [])
+        
+        # Initialize frontend based on the configuration
+        self.frontend = frontends.get_frontend(frontend_name)
         print(f"Using {frontend_name} frontend")
 
     def _compute_frontend(self, x):
+        # Apply the frontend transformation
         frontend = self.frontend(x)
         if frontend.ndim < 4:
-            return frontend.unsqueeze(1)  # (bs, 1, n_lfcc, frames)
-        return frontend # (bs, n, n_lfcc, frames)
+            return frontend.unsqueeze(1)  # Ensures correct shape: (bs, 1, n_lfcc, frames)
+        return frontend  # Maintains shape: (bs, n, n_lfcc, frames)
 
     def forward(self, x):
+        # Compute frontend features
         x = self._compute_frontend(x)
+        
+        # Compute embeddings using the LCNN parent class functionality
         feature_vec = self._compute_embedding(x)
 
         return feature_vec
