@@ -8,6 +8,8 @@ import torch
 import torch.nn as torch_nn
 
 from src import frontends
+from src.frontends import get_frontend
+
 
 
 NUM_COEFFICIENTS = 384
@@ -213,25 +215,22 @@ class LCNN(torch_nn.Module):
 class FrontendLCNN(torch_nn.Module):
     def __init__(self, device="cpu", frontend_name="mfcc", **config):
         super(FrontendLCNN, self).__init__()
+        # Initialize the frontend only once
         self.frontend = get_frontend([frontend_name])  # Pass frontend_name as a list
         self.device = device
 
-        frontend_name = kwargs.get("frontend_algorithm", [])
-        self.frontend = frontends.get_frontend(frontend_name)
         print(f"Using {frontend_name} frontend")
 
     def _compute_frontend(self, x):
         frontend = self.frontend(x)
         if frontend.ndim < 4:
             return frontend.unsqueeze(1)  # (bs, 1, n_lfcc, frames)
-        return frontend # (bs, n, n_lfcc, frames)
+        return frontend  # (bs, n, n_lfcc, frames)
 
     def forward(self, x):
         x = self._compute_frontend(x)
         feature_vec = self._compute_embedding(x)
-
         return feature_vec
-
 
 if __name__ == "__main__":
 
