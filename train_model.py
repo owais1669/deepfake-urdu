@@ -120,6 +120,9 @@ class AudioDataset(Dataset):
         return self.data[idx], self.labels[idx]
 
 # Training Function
+from tqdm import tqdm  # Import tqdm for progress bar
+
+# Training Function
 def train_model(model, train_loader, val_loader, epochs=10, learning_rate=0.001, model_name="", feature_type=""):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -129,16 +132,22 @@ def train_model(model, train_loader, val_loader, epochs=10, learning_rate=0.001,
     for epoch in range(epochs):
         model.train()
         total_loss = 0
-        for features, labels in train_loader:
-            features, labels = features.to(device), labels.to(device)
-            optimizer.zero_grad()
-            outputs = model(features)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
-            total_loss += loss.item()
+        # Wrap the training DataLoader with tqdm for a progress bar
+        with tqdm(total=len(train_loader), desc=f"Epoch {epoch + 1}/{epochs}", unit="batch") as pbar:
+            for features, labels in train_loader:
+                features, labels = features.to(device), labels.to(device)
+                optimizer.zero_grad()
+                outputs = model(features)
+                loss = criterion(outputs, labels)
+                loss.backward()
+                optimizer.step()
+                total_loss += loss.item()
+                
+                # Update the progress bar
+                pbar.set_postfix(loss=total_loss / (pbar.n + 1))
+                pbar.update(1)  # Increment the progress bar
 
-        print(f"Epoch [{epoch+1}/{epochs}], Loss: {total_loss/len(train_loader):.4f}")
+        print(f"Epoch [{epoch + 1}/{epochs}], Loss: {total_loss / len(train_loader):.4f}")
 
         # Validation
         model.eval()
@@ -159,7 +168,7 @@ def train_model(model, train_loader, val_loader, epochs=10, learning_rate=0.001,
     model_save_path = f"trained_models/{model_name}_{feature_type}.pth"
     torch.save(model.state_dict(), model_save_path)
     print(f"Model saved to {model_save_path}")
-
+    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train a deepfake audio detection model.")
     parser.add_argument("--dataset_path", type=str, required=True, help="Path to the dataset directory")
