@@ -3,6 +3,10 @@ import torch.nn as nn
 
 from src import frontends
 
+import torch
+import torch.nn as nn
+from src import frontends
+
 class MesoInception4(nn.Module):
     def __init__(self, num_classes=1, **kwargs):
         super().__init__()
@@ -12,22 +16,22 @@ class MesoInception4(nn.Module):
         self.num_classes = num_classes
 
         # InceptionLayer1
-        self.Incption1_conv1 = nn.Conv2d(self.input_channels, 1, 1, padding=0, bias=False)
+        self.Incption1_conv1 = nn.Conv2d(self.input_channels, self.input_channels, 1, padding=0, bias=False)
         self.Incption1_conv2_1 = nn.Conv2d(self.input_channels, 4, 1, padding=0, bias=False)
         self.Incption1_conv2_2 = nn.Conv2d(4, 4, 3, padding=1, bias=False)
         self.Incption1_conv3_1 = nn.Conv2d(self.input_channels, 4, 1, padding=0, bias=False)
         self.Incption1_conv3_2 = nn.Conv2d(4, 4, 3, padding=2, dilation=2, bias=False)
         self.Incption1_conv4_1 = nn.Conv2d(self.input_channels, 2, 1, padding=0, bias=False)
         self.Incption1_conv4_2 = nn.Conv2d(2, 2, 3, padding=3, dilation=3, bias=False)
-        self.Incption1_bn = nn.BatchNorm2d(11)
+        self.Incption1_bn = nn.BatchNorm2d(self.input_channels + 10)
 
         # InceptionLayer2
-        self.Incption2_conv1 = nn.Conv2d(11, 2, 1, padding=0, bias=False)
-        self.Incption2_conv2_1 = nn.Conv2d(11, 4, 1, padding=0, bias=False)
+        self.Incption2_conv1 = nn.Conv2d(self.input_channels + 10, 2, 1, padding=0, bias=False)
+        self.Incption2_conv2_1 = nn.Conv2d(self.input_channels + 10, 4, 1, padding=0, bias=False)
         self.Incption2_conv2_2 = nn.Conv2d(4, 4, 3, padding=1, bias=False)
-        self.Incption2_conv3_1 = nn.Conv2d(11, 4, 1, padding=0, bias=False)
+        self.Incption2_conv3_1 = nn.Conv2d(self.input_channels + 10, 4, 1, padding=0, bias=False)
         self.Incption2_conv3_2 = nn.Conv2d(4, 4, 3, padding=2, dilation=2, bias=False)
-        self.Incption2_conv4_1 = nn.Conv2d(11, 2, 1, padding=0, bias=False)
+        self.Incption2_conv4_1 = nn.Conv2d(self.input_channels + 10, 2, 1, padding=0, bias=False)
         self.Incption2_conv4_2 = nn.Conv2d(2, 2, 3, padding=3, dilation=3, bias=False)
         self.Incption2_bn = nn.BatchNorm2d(12)
 
@@ -98,6 +102,7 @@ class MesoInception4(nn.Module):
         x = self.dropout(x)
         x = self.fc2(x)
         return x
+
 
 class FrontendMesoInception4(MesoInception4):
     def __init__(self, **kwargs):
