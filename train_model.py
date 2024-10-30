@@ -190,7 +190,15 @@ if __name__ == "__main__":
 
     # Load model with get_model
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model_config = {}  # Adjust as necessary, or pass configurations for specific models here
+    # model_config = {}  # Adjust as necessary, or pass configurations for specific models here
+    # model = models.get_model(args.model_name, model_config, device)
+
+    model_config = {
+    "frontend_name": [args.feature_type],  # Convert feature_type to a list
+    # Add other necessary model configurations as needed
+    }
+    
+    # Initialize the model
     model = models.get_model(args.model_name, model_config, device)
 
     # Train model
