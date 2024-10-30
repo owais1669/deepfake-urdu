@@ -101,18 +101,16 @@ class FrontendLCNN(nn.Module):
         super(FrontendLCNN, self).__init__()
         self.device = device
         self.frontend = get_frontend([frontend_name])
-        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)  # Set input channels to 3
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=1, padding=1)  # Adjust input channels to 3
         self.fc = nn.Linear(32 * 40 * 40, 512)  # Adjust dimensions as needed
         print(f"Using {frontend_name} frontend")
 
     def _compute_frontend(self, x):
         frontend = self.frontend(x)
         if frontend.ndim == 5:
-            frontend = frontend[:, :, :, :, 0]  # Convert to 4D tensor if needed
-        elif frontend.size(1) == 3:  # If it has 3 channels, average them to get a single channel
-            frontend = frontend.mean(dim=1, keepdim=True)  # Average across the channel dimension
+            frontend = frontend[:, :, :, :, 0]  # Flatten to 4D if needed
         elif frontend.ndim < 4:
-            frontend = frontend.unsqueeze(1)  # Ensure it is 4D
+            frontend = frontend.unsqueeze(1)
         return frontend
 
     def _compute_embedding(self, x):
@@ -125,7 +123,7 @@ class FrontendLCNN(nn.Module):
         x = self._compute_frontend(x)
         return self._compute_embedding(x)
 
-# Test the model
+# Testing the model
 if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = FrontendLCNN(device=device, frontend_name="mfcc")
