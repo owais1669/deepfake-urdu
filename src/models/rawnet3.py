@@ -77,7 +77,7 @@ class RawNet3(nn.Module):
         :param x: input mini-batch (bs, samp)
         """
 
-        with torch.cuda.amp.autocast(enabled=False):
+        with torch.amp.autocast("cuda"(enabled=False):
             x = self.preprocess(x)
             x = torch.abs(self.conv1(x))
             if self.log_sinc:
@@ -143,18 +143,20 @@ class PreEmphasis(torch.nn.Module):
     def __init__(self, coef: float = 0.97) -> None:
         super().__init__()
         self.coef = coef
-        # Make kernel with the flipped filter for convolution
+        # make kernel
+        # In pytorch, the convolution operation uses cross-correlation. So, filter is flipped.
         self.register_buffer(
             "flipped_filter",
             torch.FloatTensor([-self.coef, 1.0]).unsqueeze(0).unsqueeze(0),
         )
 
     def forward(self, input: torch.tensor) -> torch.tensor:
-        # Ensure input has 2 dimensions, reshape if necessary
-        if len(input.size()) != 2:
-            input = input.view(input.size(0), -1)  # Flatten extra dimensions if needed
-        input = input.unsqueeze(1)  # Add channel dimension
-        input = F.pad(input, (1, 0), "reflect")  # Reflect padding for edge handling
+        assert (
+            len(input.size()) == 2
+        ), "The number of dimensions of input tensor must be 2!"
+        # reflect padding to match lengths of in/out
+        input = input.unsqueeze(1)
+        input = F.pad(input, (1, 0), "reflect")
         return F.conv1d(input, self.flipped_filter)
 
 
